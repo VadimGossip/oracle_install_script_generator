@@ -1,2 +1,1 @@
-# oracle_install_script_generator
-oracle_install_script_generator
+Проект по генерации скриптов инсталяции из хранилища oracle объектов

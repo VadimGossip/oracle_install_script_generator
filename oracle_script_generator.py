@@ -5,15 +5,29 @@ from folder_scanner import object_scan
 from oracle_object_middleware import split_oracle_object_list
 from pathlib import Path
 
-install_dir = sys.argv[1]
+gen_mode = ''
+install_dir = ''
+try:
+    install_dir = sys.argv[1]
+    gen_mode = sys.argv[2]
+except IndexError:
+
+    print('''You must specify additional parameters: install folder path and operation mode(full\incr)''')
+    exit
+
 root_dir = os.path.dirname(os.path.dirname((os.path.dirname(install_dir))))
 
-epic_skip_set = {'install'
-                ,'useful_scripts' 
-                }
+if gen_mode == 'full':
+   epic_module_skip_set = {'install'
+                          ,'useful_scripts' 
+                          }
+   object_type_skip_set = {'install'} 
+else:
+   object_type_skip_set = {'install'
+                          ,'tables'
+                          ,'rows'}
 
-
-tcs_oracle_object_list, err = object_scan(root_dir, epic_skip_set) 
+tcs_oracle_object_list, err = object_scan(root_dir, epic_module_skip_set, object_type_skip_set) 
 
 if err == '':
     split_oracle_object_list(tcs_oracle_object_list, install_dir)

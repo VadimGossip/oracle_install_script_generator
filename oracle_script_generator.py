@@ -2,11 +2,13 @@ import os
 import pprint
 import sys
 from folder_scanner import object_scan
-from oracle_object_middleware import split_oracle_object_list
+from oracle_object_middleware import send_data_to_script_writer
 from pathlib import Path
 
 gen_mode = ''
 install_dir = ''
+result  = False
+
 try:
     install_dir = sys.argv[1]
     gen_mode = sys.argv[2]
@@ -18,22 +20,26 @@ except IndexError:
 root_dir = os.path.dirname(os.path.dirname((os.path.dirname(install_dir))))
 
 if gen_mode == 'full':
-   epic_module_skip_set = {'install'
+    epic_module_skip_set = {'install'
                           ,'useful_scripts' 
                           }
-   object_type_skip_set = {'install'} 
+    object_type_skip_set = {'install'} 
+    drop_existing = True
 else:
-   object_type_skip_set = {'install'
+    object_type_skip_set = {'install'
                           ,'tables'
-                          ,'rows'}
+                          ,'rows'
+                          ,'roles'}
+    drop_existing = False
 
 tcs_oracle_object_list, err = object_scan(root_dir, epic_module_skip_set, object_type_skip_set) 
 
 if err == '':
-    split_oracle_object_list(tcs_oracle_object_list, install_dir)
-    if len(tcs_oracle_object_list) == 0:
-        print('Nothing done')
-    else:
+    result = send_data_to_script_writer(tcs_oracle_object_list, install_dir, root_dir, drop_existing)
+    if result:
         print('Operation successfully finished')
+    else:
+        print('Nothing done')
+       
 else:
     print(err)

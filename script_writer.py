@@ -7,6 +7,7 @@ def remove_file(full_path):
          os.remove(full_path)
     except OSError as e:
         None
+
 def get_schema_by_server_schema(server, schema):
     if server == 'core' and schema == 'vtbs':
         return 'core'
@@ -50,10 +51,12 @@ def create_error_log_file(undef_schema_list, undef_object_type_list, install_dir
         f = open(full_err_path, 'a+')
         f.write(error_script_text)
         f.close()
-
-def create_install_file(object_list, install_dir, install_filename, drop_existing):
-    full_path = Path(install_dir, install_filename)
     
+    return create_err_file
+
+def create_install_file(object_list, install_dir, root_dir, install_filename, drop_existing):
+    full_path = Path(install_dir, install_filename)
+        
     if drop_existing == True:
         remove_file(full_path)
   
@@ -70,7 +73,7 @@ def create_install_file(object_list, install_dir, install_filename, drop_existin
         
         if item["object_type"].find('scripts') == -1:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item['module_name'] + '-------------------------'
-            main_path = os.path.dirname((os.path.dirname(install_dir)))
+            main_path = root_dir
         else:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item["object_type"] + '-------------------------'
             main_path = install_dir
@@ -90,8 +93,11 @@ def create_install_file(object_list, install_dir, install_filename, drop_existin
             install_script_text += item["path_to_file"].replace(main_path, '@ ../..').replace('\\','/') + '\n'
         else:
             install_script_text += item["path_to_file"].replace(main_path, '@     .').replace('\\','/') + '\n'
+    
     if create_file:
        install_script_text += '\n' + 'spool off'
        f = open(full_path, 'a+')
        f.write(install_script_text)
        f.close()   
+    
+    return create_file

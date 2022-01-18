@@ -62,7 +62,7 @@ def extract_info_from_path_list(path_list, mode):
              
     except Exception:
         result = ''
-    return result   
+    return result  
 
 def convert_path_to_tcs_oracle_object(tcs_path, dirpath, filename, epic_module_skip_set, object_type_skip_set):
     error = ''
@@ -73,6 +73,9 @@ def convert_path_to_tcs_oracle_object(tcs_path, dirpath, filename, epic_module_s
         epic_module_name = extract_info_from_path_list(path_list, 'epic_module_name')
         module_name = extract_info_from_path_list(path_list, 'module_name')
         object_type = extract_info_from_path_list(path_list, 'object_type')
+        
+        if object_type == 'tables' and filename.split('.')[1] != 'sql':
+            object_type = 'triggers'
         
         if epic_module_name not in epic_module_skip_set and object_type not in object_type_skip_set:
             server_schema_list, error = extract_schema_server_from_file(path)
@@ -96,6 +99,6 @@ def object_scan(tcs_path, epic_module_skip_set, object_type_skip_set):
     for dirpath, _, filenames in os.walk(tcs_path): 
         for filename in filenames:
             if filename.find('.') != -1:
-                if filename.split('.')[1] == 'sql':
+                if filename[-len('sql'):] == 'sql':
                     error = convert_path_to_tcs_oracle_object(tcs_path, dirpath, filename, epic_module_skip_set, object_type_skip_set) 
     return tcs_oracle_object_list, error

@@ -1,6 +1,7 @@
 #Данный скрипт получает на вход список словарей объектов и имя файла, который необходимо создать, а также параметр, в зависимости от которого будут удаляться существующие файлы с таким именем или создаваться новые копии. 
 import os
 from pathlib import Path
+import config
 
 def remove_file(full_path):
     try:
@@ -22,8 +23,8 @@ def get_schema_by_server_schema(server, schema):
     else:
         return ''
 
-def create_error_log_file(undef_schema_list, undef_object_type_list, install_dir, install_filename, drop_existing):
-    full_err_path = Path(install_dir, install_filename)
+def create_error_log_file(undef_schema_list, undef_object_type_list, install_filename, drop_existing):
+    full_err_path = Path(config.install_dir, install_filename)
 
     if drop_existing == True:
         remove_file(full_err_path)
@@ -54,8 +55,8 @@ def create_error_log_file(undef_schema_list, undef_object_type_list, install_dir
     
     return create_err_file
 
-def create_install_file(object_list, install_dir, root_dir, install_filename, drop_existing):
-    full_path = Path(install_dir, install_filename)
+def create_install_file(object_list, install_filename, drop_existing):
+    full_path = Path(config.install_dir, install_filename)
         
     if drop_existing == True:
         remove_file(full_path)
@@ -73,10 +74,10 @@ def create_install_file(object_list, install_dir, root_dir, install_filename, dr
         
         if item["object_type"].find('scripts') == -1:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item['module_name'] + '-------------------------'
-            main_path = root_dir
+            main_path = config.root_dir
         else:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item["object_type"] + '-------------------------'
-            main_path = install_dir
+            main_path = config.install_dir
         
         cur_object_type_header = 'prompt '+ item["object_type"]
          

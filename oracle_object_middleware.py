@@ -1,7 +1,8 @@
 # Данный скрипт будет получаеть на вход список словарей с оракловыми объектами, разбивать их в зависимости от схемы и сервера на списки, которые будет передавть скрипту, 
 # который будет формировать из них файлы. Функции скрипта, сортировка и фильтрация.
-import pprint
 from script_writer import create_install_file, create_error_log_file
+import git_scanner
+import config
 
 allowed_object_type_sort_mask = {"tablespaces"    : 0
                                 ,"directories"    : 1
@@ -34,21 +35,24 @@ def install_script_object_cost(object_type):
     else:
         return 1  
 
-def filename_cost(object_filename):
+def filename_cost(object_type, object_filename):
     def check_object_filename_ending(object_filename, mask):
         return object_filename.split('.')[0][-len(mask):] == mask
-    if check_object_filename_ending(object_filename, 'read'):
-        return 0
-    if check_object_filename_ending(object_filename, 'digests'):
-        return 1
-    elif check_object_filename_ending(object_filename, 'ri'):
-        return 2
-    elif check_object_filename_ending(object_filename, 'utils'):
-        return 3
-    elif check_object_filename_ending(object_filename, 'ui'):
-        return 4
-    else:
-        return 100
+    if object_type == 'packages':
+        if check_object_filename_ending(object_filename, 'read'):
+            return 0
+        if check_object_filename_ending(object_filename, 'digests'):
+            return 1
+        elif check_object_filename_ending(object_filename, 'utils'):
+            return 2
+        elif check_object_filename_ending(object_filename, 'ri'):
+            return 3
+        elif check_object_filename_ending(object_filename, 'ui'):
+            return 4
+        else:
+            return 100
+    elif object_type == 'types':
+        return len(object_filename)
 
 def module_object_type_cost(object_type):
     try:             
@@ -57,28 +61,30 @@ def module_object_type_cost(object_type):
         return 100
 
 def sort_object_list (tcs_oracle_object_list):
-    return sorted(tcs_oracle_object_list, key = lambda item: (install_script_object_cost(item['object_type']), item['epic_module_name'], item['module_name'], module_object_type_cost(item['object_type']), filename_cost(item['filename'])))
+    return sorted(tcs_oracle_object_list, key = lambda item: (install_script_object_cost(item['object_type']), item['epic_module_name'], item['module_name'], module_object_type_cost(item['object_type']), filename_cost(item['object_type'], item['filename'])))
 
 def split_oracle_object_list(tcs_oracle_object_list):
     core_vtbs_list, hpffm_vtbs_list, hpffm_vtbs_adesk_list, hpffm_vtbs_x_alaris_list, hpffm_vtbs_bi_list, undef_schema_list, undef_object_type_list = [],[],[],[],[],[],[]
     splited_oracle_object_list = []
+    git_full_filename_path_list = git_scanner.scan_git_for_changed_objects()
+    print (git_full_filename_path_list)
     for object in tcs_oracle_object_list:
+        if  (object["path_to_file"] in git_full_filename_path_list or config.gen_mode == 'full') and object["object_type"] in allowed_object_type_sort_mask:
+            if object["schema"] == 'vtbs' and object["server"] == 'core' :
+                core_vtbs_list.append(object)
+            elif object["schema"] == 'vtbs' and object["server"] == 'hpffm':
+                hpffm_vtbs_list.append(object) 
+            elif object["schema"] == 'vtbs_adesk' and object["server"] == 'hpffm':
+                hpffm_vtbs_adesk_list.append(object)
+            elif object["schema"] == 'vtbs_x_alaris' and object["server"] == 'hpffm':
+                hpffm_vtbs_x_alaris_list.append(object)
+            elif object["schema"] == 'vtbs_bi' and object["server"] == 'hpffm':
+                hpffm_vtbs_bi_list.append(object)
+            else:
+                undef_schema_list.append(object)
         
-        if object["schema"] == 'vtbs' and object["server"] == 'core' and object["object_type"] in allowed_object_type_sort_mask:
-            core_vtbs_list.append(object)
-        elif object["schema"] == 'vtbs' and object["server"] == 'hpffm' and object["object_type"] in allowed_object_type_sort_mask: 
-            hpffm_vtbs_list.append(object) 
-        elif object["schema"] == 'vtbs_adesk' and object["server"] == 'hpffm' and object["object_type"] in allowed_object_type_sort_mask: 
-            hpffm_vtbs_adesk_list.append(object)
-        elif object["schema"] == 'vtbs_x_alaris' and object["server"] == 'hpffm' and object["object_type"] in allowed_object_type_sort_mask: 
-            hpffm_vtbs_x_alaris_list.append(object)
-        elif object["schema"] == 'vtbs_bi' and object["server"] == 'hpffm' and object["object_type"] in allowed_object_type_sort_mask:
-            hpffm_vtbs_bi_list.append(object)
-        else:
-            undef_schema_list.append(object)
-        
-        if object["object_type"] not in allowed_object_type_sort_mask:
-            undef_object_type_list.append(object)
+            if object["object_type"] not in allowed_object_type_sort_mask:
+                undef_object_type_list.append(object)
     
     if len(core_vtbs_list) != 0:
         splited_oracle_object_list.append({"filename"     : '10_VTBS_CORE.sql',
@@ -98,13 +104,12 @@ def split_oracle_object_list(tcs_oracle_object_list):
 
     return splited_oracle_object_list, undef_object_type_list, undef_schema_list
 
-def send_data_to_script_writer(tcs_oracle_object_list, install_dir, root_dir, drop_existing):
-    print(install_dir)
+def send_data_to_script_writer(tcs_oracle_object_list, drop_existing):
     splited_oracle_object_list, undef_object_type_list, undef_schema_list = split_oracle_object_list(tcs_oracle_object_list)
 
-    file_created = create_error_log_file(undef_schema_list, undef_object_type_list, install_dir, 'error_log.txt', True)
+    file_created = create_error_log_file(undef_schema_list, undef_object_type_list, 'error_log.txt', True)
 
     for splited_item in splited_oracle_object_list:
-        file_created = create_install_file(splited_item["object_list"], install_dir, root_dir, splited_item["filename"], drop_existing) or file_created
+        file_created = create_install_file(splited_item["object_list"], splited_item["filename"], drop_existing) or file_created
     
     return file_created

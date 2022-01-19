@@ -2,6 +2,8 @@
 # Сканнер поднимается на 3 шага вверх относительно указанной папки и после этого сканирует все файлы лежащие ниже, превращая их в список словарей.
 import os
 from pathlib import Path
+import config
+import path_parser
 
 tcs_oracle_object_list = []
 
@@ -50,29 +52,15 @@ def extract_schema_server_from_file(path):
          error = 'Error on extracting server and schema from Path_value = ' + os.fspath(path)   
      return server_schema_list, error
 
-def extract_info_from_path_list(path_list, mode):
-    result = ''
-    try:
-        if mode == 'epic_module_name':
-            result = path_list[0]
-        elif mode == 'module_name':
-            result = path_list[1]
-        elif mode == 'object_type':
-            result = path_list[2] 
-             
-    except Exception:
-        result = ''
-    return result  
-
 def convert_path_to_tcs_oracle_object(tcs_path, dirpath, filename, epic_module_skip_set, object_type_skip_set):
     error = ''
     path = Path(dirpath, filename)
     try:
         path_wo_tcs_path = (os.fspath((path)).split(tcs_path)[1])[1:]
         path_list = path_wo_tcs_path.split(os.sep)
-        epic_module_name = extract_info_from_path_list(path_list, 'epic_module_name')
-        module_name = extract_info_from_path_list(path_list, 'module_name')
-        object_type = extract_info_from_path_list(path_list, 'object_type')
+        epic_module_name = path_parser.extract_info_from_path_list(path_list, 'epic_module_name')
+        module_name = path_parser.extract_info_from_path_list(path_list, 'module_name')
+        object_type = path_parser.extract_info_from_path_list(path_list, 'object_type')
         
         if object_type == 'tables' and filename.split('.')[1] != 'sql':
             object_type = 'triggers'
@@ -94,11 +82,11 @@ def convert_path_to_tcs_oracle_object(tcs_path, dirpath, filename, epic_module_s
         error = 'Error on parsing Path to object of dict. Path_value =' + os.fspath(path) 
     return error
 
-def object_scan(tcs_path, epic_module_skip_set, object_type_skip_set):
+def object_scan(epic_module_skip_set, object_type_skip_set):
     error = ''
-    for dirpath, _, filenames in os.walk(tcs_path): 
+    for dirpath, _, filenames in os.walk(config.root_dir): 
         for filename in filenames:
             if filename.find('.') != -1:
                 if filename[-len('sql'):] == 'sql':
-                    error = convert_path_to_tcs_oracle_object(tcs_path, dirpath, filename, epic_module_skip_set, object_type_skip_set) 
+                    error = convert_path_to_tcs_oracle_object(config.root_dir, dirpath, filename, epic_module_skip_set, object_type_skip_set) 
     return tcs_oracle_object_list, error

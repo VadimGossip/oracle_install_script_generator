@@ -17,4 +17,4 @@ def scan_git_for_changed_objects():
         module_name = path_parser.extract_info_from_path_list(path_list, 'module_name')
         if epic_module_name != 'install' or module_name == 'scripts':
             git_full_filename_path_list.append(os.fspath(Path(config.root_dir, item)))
-    return git_full_filename_path_li
+    return git_full_filename_path_list

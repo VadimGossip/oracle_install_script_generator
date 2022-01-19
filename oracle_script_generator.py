@@ -17,7 +17,10 @@ if config.gen_mode in ['full', 'patch']:
         object_type_skip_set = {'install'
                                ,'tables'
                                ,'rows'
-                               ,'roles'}
+                               ,'roles'
+                               ,'users'
+                               ,'dblinks'
+                               ,'tablespaces'}
         drop_existing = False
 
     tcs_oracle_object_list, err = object_scan(epic_module_skip_set, object_type_skip_set)

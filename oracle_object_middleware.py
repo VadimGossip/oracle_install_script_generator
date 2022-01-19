@@ -67,7 +67,6 @@ def split_oracle_object_list(tcs_oracle_object_list):
     core_vtbs_list, hpffm_vtbs_list, hpffm_vtbs_adesk_list, hpffm_vtbs_x_alaris_list, hpffm_vtbs_bi_list, undef_schema_list, undef_object_type_list = [],[],[],[],[],[],[]
     splited_oracle_object_list = []
     git_full_filename_path_list = git_scanner.scan_git_for_changed_objects()
-    print (git_full_filename_path_list)
     for object in tcs_oracle_object_list:
         if  (object["path_to_file"] in git_full_filename_path_list or config.gen_mode == 'full') and object["object_type"] in allowed_object_type_sort_mask:
             if object["schema"] == 'vtbs' and object["server"] == 'core' :
@@ -108,8 +107,6 @@ def send_data_to_script_writer(tcs_oracle_object_list, drop_existing):
     splited_oracle_object_list, undef_object_type_list, undef_schema_list = split_oracle_object_list(tcs_oracle_object_list)
 
     file_created = create_error_log_file(undef_schema_list, undef_object_type_list, 'error_log.txt', True)
-
     for splited_item in splited_oracle_object_list:
         file_created = create_install_file(splited_item["object_list"], splited_item["filename"], drop_existing) or file_created
-    
     return file_created

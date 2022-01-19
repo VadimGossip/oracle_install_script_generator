@@ -55,12 +55,24 @@ def create_error_log_file(undef_schema_list, undef_object_type_list, install_fil
     
     return create_err_file
 
+def check_and_gen_filename (full_path, install_filename):
+    counter = 1
+    tmp_filename = install_filename
+    while os.path.exists(full_path):
+           tmp_filename = install_filename.split('.')[0] + '_' + str(counter) + '.' + install_filename.split('.')[1]
+           full_path = Path(config.install_dir, tmp_filename) 
+           counter += 1 
+    return tmp_filename
+
 def create_install_file(object_list, install_filename, drop_existing):
     full_path = Path(config.install_dir, install_filename)
-        
+         
     if drop_existing == True:
         remove_file(full_path)
-  
+    else:
+        install_filename = check_and_gen_filename(full_path, install_filename) 
+        full_path = Path(config.install_dir, install_filename)
+            
     install_script_text = ''
     object_type_header = ''
     module_header = ''

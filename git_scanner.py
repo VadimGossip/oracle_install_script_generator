@@ -9,12 +9,13 @@ import path_parser
 def scan_git_for_changed_objects():
     git_full_filename_path_list = []
     repository = git.Repo(config.root_dir)
-    commits_list = list(repository.iter_commits())
-    commit = commits_list[0] ## вынести параметр, какой коммит брать в конфиг
-    for item in commit.stats.files:
-        path_list = item.split('/')
-        epic_module_name = path_parser.extract_info_from_path_list(path_list, 'epic_module_name')
-        module_name = path_parser.extract_info_from_path_list(path_list, 'module_name')
-        if epic_module_name != 'install' or module_name == 'scripts':
-            git_full_filename_path_list.append(os.fspath(Path(config.root_dir, item)))
+    filtered_commit_list = list(repository.iter_commits())[:config.commit_look_depth]
+
+    for commit in filtered_commit_list:
+        for item in commit.stats.files:
+            path_list = item.split('/')
+            epic_module_name = path_parser.extract_info_from_path_list(path_list, 'epic_module_name')
+            module_name = path_parser.extract_info_from_path_list(path_list, 'module_name')
+            if epic_module_name != 'install' or module_name == 'scripts':
+                git_full_filename_path_list.append(os.fspath(Path(config.root_dir, item)))
     return git_full_filename_path_list

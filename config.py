@@ -27,4 +27,3 @@ def init_command_line_params():
 
 install_dir, gen_mode, commit_look_depth = init_command_line_params()
 root_dir = os.path.dirname(os.path.dirname((os.path.dirname(install_dir))))
-print(install_dir, gen_mode, commit_look_depth)

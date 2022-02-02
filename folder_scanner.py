@@ -84,9 +84,9 @@ def convert_path_to_tcs_oracle_object(tcs_path, dirpath, filename, epic_module_s
 
 def object_scan(epic_module_skip_set, object_type_skip_set):
     error = ''
-    for dirpath, _, filenames in os.walk(config.root_dir): 
+    for dirpath, _, filenames in os.walk(config.obj_root_dir): 
         for filename in filenames:
             if filename.find('.') != -1:
                 if filename[-len('sql'):] == 'sql':
-                    error = convert_path_to_tcs_oracle_object(config.root_dir, dirpath, filename, epic_module_skip_set, object_type_skip_set) 
+                    error = convert_path_to_tcs_oracle_object(config.obj_root_dir, dirpath, filename, epic_module_skip_set, object_type_skip_set) 
     return tcs_oracle_object_list, error

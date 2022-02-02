@@ -1,18 +1,17 @@
 from folder_scanner import object_scan
 from oracle_object_middleware import send_data_to_script_writer
 import config
-import git_scanner
 result  = False
 
-if config.gen_mode in ['full', 'patch']:
+if config.mode_params["scan_mode_name"] in ['full', 'patch']:
     
-    if config.gen_mode == 'full':
+    if config.mode_params["scan_mode_name"] == 'full':
         epic_module_skip_set = {'install'
                               ,'useful_scripts' 
                                }
         object_type_skip_set = {'install'} 
         drop_existing = True
-    elif config.gen_mode == 'patch': 
+    elif config.mode_params["scan_mode_name"] == 'patch': 
         epic_module_skip_set = set()
         object_type_skip_set = {'install'
                                ,'tables'

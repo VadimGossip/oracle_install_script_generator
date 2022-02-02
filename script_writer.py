@@ -86,7 +86,7 @@ def create_install_file(object_list, install_filename, drop_existing):
         
         if item["object_type"].find('scripts') == -1:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item['module_name'] + '-------------------------'
-            main_path = config.root_dir
+            main_path = config.obj_root_dir
         else:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item["object_type"] + '-------------------------'
             main_path = config.install_dir

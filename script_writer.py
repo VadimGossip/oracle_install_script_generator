@@ -1,13 +1,16 @@
 #Данный скрипт получает на вход список словарей объектов и имя файла, который необходимо создать, а также параметр, в зависимости от которого будут удаляться существующие файлы с таким именем или создаваться новые копии. 
 import os
 from pathlib import Path
+from pickle import FALSE
 import config
+
 
 def remove_file(full_path):
     try:
          os.remove(full_path)
     except OSError as e:
         None
+
 
 def get_schema_by_server_schema(server, schema):
     if server == 'core' and schema == 'vtbs':
@@ -23,12 +26,32 @@ def get_schema_by_server_schema(server, schema):
     else:
         return ''
 
-def create_error_log_file(undef_schema_list, undef_object_type_list, install_filename, drop_existing):
-    full_err_path = Path(config.install_dir, install_filename)
 
-    if drop_existing == True:
-        remove_file(full_err_path)
+def file_writer(full_path, filetext, add_to_file):
+    if not add_to_file:
+        remove_file(full_path)
     
+    f = open(full_path, 'w')
+    f.write(filetext)
+    f.close()
+
+
+def get_prev_text(full_path):
+    f = open(full_path, 'r')
+    text = ''
+    lines = f.readlines()
+    if lines:
+        if lines[-1].find("spool off") != - 1:
+            lines = lines[:(len(lines) - 4)] 
+    for line in lines:
+        text += str(line)
+    print(text)
+    return text
+
+
+def create_error_log_file(undef_schema_list, undef_object_type_list, install_filename):
+    full_err_path = Path(config.install_dir, install_filename)
+ 
     error_script_text = ''
     create_err_file = False
     
@@ -49,11 +72,10 @@ def create_error_log_file(undef_schema_list, undef_object_type_list, install_fil
         error_script_text += item['object_type'] + '    ' + item["path_to_file"] + '\n'
     
     if create_err_file:
-        f = open(full_err_path, 'a+')
-        f.write(error_script_text)
-        f.close()
+        file_writer(full_err_path, error_script_text, False)
     
     return create_err_file
+
 
 def check_and_gen_filename (full_path, install_filename):
     counter = 1
@@ -64,26 +86,29 @@ def check_and_gen_filename (full_path, install_filename):
            counter += 1 
     return tmp_filename
 
-def create_install_file(object_list, install_filename, drop_existing):
+
+def create_install_file(object_list, install_filename):
     full_path = Path(config.install_dir, install_filename)
-         
-    if drop_existing == True:
-        remove_file(full_path)
-    else:
-        install_filename = check_and_gen_filename(full_path, install_filename) 
-        full_path = Path(config.install_dir, install_filename)
-            
     install_script_text = ''
     object_type_header = ''
     module_header = ''
     create_file = False
+    
+    if config.mode_params["file_write_mode"]["new_file"]:
+       install_filename = check_and_gen_filename(full_path, install_filename) 
+       full_path = Path(config.install_dir, install_filename)
+    elif config.mode_params["file_write_mode"]["add_to_end"] and os.path.exists(full_path):
+      install_script_text = get_prev_text(full_path)     
 
+      if object_list and install_script_text != '':
+          install_script_text += '------------------------- commit_id = '+ config.mode_params["commit_id"] + '------------------------- \n'       
+ 
     for item in object_list:
         create_file = True
 
         if install_script_text == '':
             install_script_text =  '-- Schema: ' + get_schema_by_server_schema(item["server"], item["schema"]).upper() + ' \nprompt install '+ install_filename + ' \nset define off spool ' + install_filename.split('.')[0] + '.log append \n \n'
-        
+                         
         if item["object_type"].find('scripts') == -1:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item['module_name'] + '-------------------------'
             main_path = config.obj_root_dir
@@ -108,9 +133,7 @@ def create_install_file(object_list, install_filename, drop_existing):
             install_script_text += item["path_to_file"].replace(main_path, '@     .').replace('\\','/') + '\n'
     
     if create_file:
-       install_script_text += '\n' + 'spool off'
-       f = open(full_path, 'a+')
-       f.write(install_script_text)
-       f.close()   
+       install_script_text += '\n\n' + 'spool ' + install_filename.split('.')[0] + '.log append \n \n' + 'spool off'
+       file_writer(full_path, install_script_text, config.mode_params["file_write_mode"]["add_to_end"])
     
     return create_file

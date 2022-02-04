@@ -136,10 +136,10 @@ def split_oracle_object_list(tcs_oracle_object_list):
                                             "object_list"  : sort_object_list(hpffm_vtbs_bi_migration_list)})
     return splited_oracle_object_list, undef_object_type_list, undef_schema_list
 
-def send_data_to_script_writer(tcs_oracle_object_list, drop_existing):
+def send_data_to_script_writer(tcs_oracle_object_list):
     splited_oracle_object_list, undef_object_type_list, undef_schema_list = split_oracle_object_list(tcs_oracle_object_list)
 
-    file_created = create_error_log_file(undef_schema_list, undef_object_type_list, 'error_log.txt', True)
+    file_created = create_error_log_file(undef_schema_list, undef_object_type_list, 'error_log.txt')
     for splited_item in splited_oracle_object_list:
-        file_created = create_install_file(splited_item["object_list"], splited_item["filename"], drop_existing) or file_created
+        file_created = create_install_file(splited_item["object_list"], splited_item["filename"]) or file_created
     return file_created

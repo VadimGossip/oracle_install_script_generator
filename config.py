@@ -33,11 +33,14 @@ def init_parms_from_config():
        if install_dir[-1] == os.sep: 
          obj_root_dir = os.path.dirname(obj_root_dir) 
     
+    file_write_mode = {"recreate "  : False,
+                       "new_file"   : False,
+                       "add_to_end" : False} 
     mode_params = {
                    'scan_mode_name'      : '',
                    'commit_id'           : '',
                    'recreate_file'       : '',
-                   'add_to_end'          : '',        
+                   'file_write_mode'     : file_write_mode,        
                   }
       
     if bool(parsed_yaml_file["mode"]["full_mode_props"]["enabled"]):
@@ -53,15 +56,12 @@ def init_parms_from_config():
        mode_params["commit_id"] =  parsed_yaml_file["mode"]["patch_mode_props"]["commit_id"]
     
     if bool(parsed_yaml_file["mode"]["full_mode_props"]["enabled"]):
-       mode_params["recreate_file"] = True
-       mode_params["add_to_end"] = False
-    else:
-       mode_params["recreate_file"] = False
-
+       mode_params["file_write_mode"]["recreate"] = True
+    elif bool(parsed_yaml_file["mode"]["patch_mode_props"]["enabled"]):
        if bool(parsed_yaml_file["mode"]["patch_mode_props"]["add_to_end"]):
-           mode_params["add_to_end"] = True
+           mode_params["file_write_mode"]["add_to_end"] = True
        else:
-           mode_params["add_to_end"] = False
+           mode_params["file_write_mode"]["new_file"] = True
 
     return install_dir, obj_root_dir, mode_params
 

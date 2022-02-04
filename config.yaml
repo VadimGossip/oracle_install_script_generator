@@ -7,5 +7,5 @@ mode:
     patch_mode_props:            
                 enabled:  True # In patch mode in this mode we create/rewrite to the end of existing install files only for objects that have been changed after some commit 
                 commit_id: adb36bf038dc59281e3af594bf35ad42e112257b #Id of commit after that we look for changed objects including 
-                add_to_end: False  #True/ False in this mode we are write info to the end of install if it exists 
+                add_to_end: True  #True/ False in this mode we are write info to the end of install if it exists 
    #default mode full = False commit_id = last commit add_to_end = True  

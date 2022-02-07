@@ -2,9 +2,7 @@
 import yaml
 import sys
 import os
-
-# pydriller
-
+from pathlib import Path
 
 #ToDo: Валидация конфига 
 def validate_params(install_dir, obj_root_dir, mode_params):
@@ -21,7 +19,7 @@ def validate_params(install_dir, obj_root_dir, mode_params):
 
 def init_parms_from_config():
     
-    yaml_file = open("config.yaml")
+    yaml_file = open(Path(os.path.dirname(__file__),"config.yaml"))
     parsed_yaml_file = yaml.load(yaml_file, Loader=yaml.FullLoader)
     install_dir = parsed_yaml_file["path"]["install_dir"]
     obj_root_dir = parsed_yaml_file["path"]["obj_root_dir"]

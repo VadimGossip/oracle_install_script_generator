@@ -45,7 +45,6 @@ def get_prev_text(full_path):
             lines = lines[:(len(lines) - 4)] 
     for line in lines:
         text += str(line)
-    print(text)
     return text
 
 

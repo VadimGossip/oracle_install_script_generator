@@ -31,13 +31,13 @@ def file_writer(full_path, filetext, add_to_file):
     if not add_to_file:
         remove_file(full_path)
     
-    f = open(full_path, 'w')
+    f = open(full_path, 'w', encoding='utf-8')
     f.write(filetext)
     f.close()
 
 
 def get_prev_text(full_path):
-    f = open(full_path, 'r')
+    f = open(full_path, 'r', encoding='utf-8')
     text = ''
     lines = f.readlines()
     if lines:

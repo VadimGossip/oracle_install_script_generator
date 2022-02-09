@@ -33,7 +33,7 @@ def extract_schema_server_from_file(path):
      error = ''
      server_schema_list = []
      try:
-        f = open(path,'r')
+        f = open(path, 'r', encoding='utf-8')
         lines = f.readlines()
         for line in lines:
             if line.lower().find("schema") != - 1:

@@ -21,11 +21,14 @@ def scan_git_for_changed_objects():
         config.mode_params["commit_id"] = commit_id
     
     filtered_commit_list = filter(lambda x: x.committed_datetime >= repository.commit(commit_id).committed_datetime, list(repository.iter_commits()))
-  
-    for commit in filtered_commit_list:
 
+    for commit in filtered_commit_list:
+        if commit.message.startswith('Merged PR'):
+            continue
+         
         for item in commit.stats.files:
             path_list = item.split('/') 
+            
             
             epic_module_name = path_parser.extract_info_from_path_list(path_list, 'epic_module_name')
             module_name = path_parser.extract_info_from_path_list(path_list, 'module_name')

@@ -3,7 +3,6 @@ from oracle_object_middleware import send_data_to_script_writer
 import config
 result  = False
 
-
 if config.mode_params["scan_mode_name"] == 'full':
     epic_module_skip_set = {'install'
                            ,'useful_scripts' 
@@ -27,4 +26,4 @@ if err == '':
     else:
         print('Nothing done')        
 else:
-    print(err)    
+    print(err)

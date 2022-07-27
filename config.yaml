@@ -6,6 +6,6 @@ mode:
                 enabled:  False # True/False in this mode we delete all install files in install dir and make install for all oracle objects if False                        
     patch_mode_props:            
                 enabled:  True # In patch mode in this mode we create/rewrite to the end of existing install files only for objects that have been changed after some commit 
-                commit_id: fff95f707566b4b4189f8868c7a310af7a0ef9c3  #Id of commit after that we look for changed objects including 
+                commit_id: 0c9907a1422cfc6182df1872e8cfa9cd276c0297  #Id of commit after that we look for changed objects including 
                 add_to_end: True  #True/ False in this mode we are write info to the end of install if it exists 
    #default mode full = False commit_id = last commit add_to_end = True  

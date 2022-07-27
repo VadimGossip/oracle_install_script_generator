@@ -27,7 +27,9 @@ def scan_git_for_changed_objects():
         if commit.message.startswith('Merged PR'):
             continue
         else:
-            commit_msg = commit.message 
+            commit_msg = commit.message
+            commit_msg = commit_msg[:commit_msg.find('Related')].rstrip()
+            
          
         for item in commit.stats.files:
             path_list = item.split('/') 

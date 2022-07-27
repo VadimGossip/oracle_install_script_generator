@@ -100,7 +100,7 @@ def create_install_file(object_list, install_filename, commit_msg):
       install_script_text = get_prev_text(full_path)     
 
       if object_list and install_script_text != '':
-          install_script_text += '\n\n------------------------- '+ commit_msg  
+          install_script_text += '\n/*\n'+ commit_msg + '\n*/'
  
     for item in object_list:
         create_file = True

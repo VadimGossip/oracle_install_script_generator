@@ -15,22 +15,24 @@ def validate_params(install_dir, obj_root_dir, mode_params):
    elif mode_params["scan_mode_name"] == 'undef':
       return 'Script scan mode undefined, please check condig'
    else:
-      return ''   
+      return ''
+
+def format_dir(dir):
+   if dir != None:
+      if dir[-1] == os.sep:
+         return os.path.dirname(dir)
+   return dir         
 
 def init_parms_from_config():
     
     yaml_file = open(Path(os.path.dirname(__file__),"config.yaml"))
     parsed_yaml_file = yaml.load(yaml_file, Loader=yaml.FullLoader)
-    install_dir = parsed_yaml_file["path"]["install_dir"]
-    obj_root_dir = parsed_yaml_file["path"]["obj_root_dir"]
+    install_dir = format_dir(parsed_yaml_file["path"]["install_dir"])
+    obj_root_dir = format_dir(parsed_yaml_file["path"]["obj_root_dir"])
 
     if obj_root_dir == None:
        obj_root_dir = os.path.dirname((os.path.dirname(install_dir)))
 
-       #проблема закрывающего флеша, в параметре  install dir конфига без него проваливаемся выше. Будет время найти более красиове решение
-       if install_dir[-1] == os.sep: 
-         obj_root_dir = os.path.dirname(obj_root_dir) 
-    
     file_write_mode = {"recreate "  : False,
                        "new_file"   : False,
                        "add_to_end" : False} 

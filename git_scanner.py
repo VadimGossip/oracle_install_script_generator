@@ -13,6 +13,7 @@ def check_rename(filename):
 
 def scan_git_for_changed_objects():
     git_full_filename_path_list = []
+     
     repository = git.Repo(config.obj_root_dir)
     commit_id = config.mode_params["commit_id"]
 
@@ -25,6 +26,8 @@ def scan_git_for_changed_objects():
     for commit in filtered_commit_list:
         if commit.message.startswith('Merged PR'):
             continue
+        else:
+            commit_msg = commit.message 
          
         for item in commit.stats.files:
             path_list = item.split('/') 
@@ -39,4 +42,4 @@ def scan_git_for_changed_objects():
             
             if (epic_module_name != 'install' or object_type.find('scripts') != -1) and path_to_file not in git_full_filename_path_list:
                 git_full_filename_path_list.append(path_to_file)
-    return git_full_filename_path_list
+    return git_full_filename_path_list, commit_msg

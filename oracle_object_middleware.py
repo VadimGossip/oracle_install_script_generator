@@ -69,7 +69,7 @@ def split_oracle_object_list(tcs_oracle_object_list):
     core_vtbs_migration_list, hpffm_vtbs_migration_list, hpffm_vtbs_adesk_migration_list, hpffm_vtbs_x_alaris_migration_list, hpffm_vtbs_bi_migration_list = [],[],[],[],[]
     undef_schema_list, undef_object_type_list = [],[]
     splited_oracle_object_list = []
-    git_full_filename_path_list = git_scanner.scan_git_for_changed_objects()
+    git_full_filename_path_list, commit_msg = git_scanner.scan_git_for_changed_objects()
     for object in tcs_oracle_object_list:
         if  (object["path_to_file"] in git_full_filename_path_list or config.mode_params["scan_mode_name"] == 'full') and object["object_type"] in allowed_object_type_sort_mask:
             if object["schema"] == 'vtbs' and object["server"] == 'core' :
@@ -134,12 +134,12 @@ def split_oracle_object_list(tcs_oracle_object_list):
     if len(hpffm_vtbs_bi_migration_list) != 0:
         splited_oracle_object_list.append( {"filename"     : '94_VTBS_BI_HPFFM_MIGRATION.sql',
                                             "object_list"  : sort_object_list(hpffm_vtbs_bi_migration_list)})
-    return splited_oracle_object_list, undef_object_type_list, undef_schema_list
+    return splited_oracle_object_list, undef_object_type_list, undef_schema_list, commit_msg
 
 def send_data_to_script_writer(tcs_oracle_object_list):
-    splited_oracle_object_list, undef_object_type_list, undef_schema_list = split_oracle_object_list(tcs_oracle_object_list)
+    splited_oracle_object_list, undef_object_type_list, undef_schema_list, commit_msg = split_oracle_object_list(tcs_oracle_object_list)
 
     file_created = create_error_log_file(undef_schema_list, undef_object_type_list, 'error_log.txt')
     for splited_item in splited_oracle_object_list:
-        file_created = create_install_file(splited_item["object_list"], splited_item["filename"]) or file_created
+        file_created = create_install_file(splited_item["object_list"], splited_item["filename"], commit_msg) or file_created
     return file_created

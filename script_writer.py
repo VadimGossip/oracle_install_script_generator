@@ -31,9 +31,10 @@ def file_writer(full_path, filetext, add_to_file):
     if not add_to_file:
         remove_file(full_path)
     
-    f = open(full_path, 'w', encoding='utf-8')
-    f.write(filetext)
-    f.close()
+    if filetext != '':
+        f = open(full_path, 'w', encoding='utf-8')
+        f.write(filetext)
+        f.close()
 
 
 def get_prev_text(full_path):
@@ -42,14 +43,13 @@ def get_prev_text(full_path):
     lines = f.readlines()
     if lines:
         if lines[-1].find("spool off") != - 1:
-            lines = lines[:(len(lines) - 4)] 
+            lines = lines[:(len(lines) - 1)] 
     for line in lines:
         text += str(line)
     return text
 
-
-def create_error_log_file(undef_schema_list, undef_object_type_list, install_filename):
-    full_err_path = Path(config.install_dir, install_filename)
+def create_error_log_file(undef_schema_list, undef_object_type_list, err_filename):
+    full_err_path = Path(config.install_dir, err_filename)
  
     error_script_text = ''
     create_err_file = False
@@ -70,8 +70,8 @@ def create_error_log_file(undef_schema_list, undef_object_type_list, install_fil
         
         error_script_text += item['object_type'] + '    ' + item["path_to_file"] + '\n'
     
-    if create_err_file:
-        file_writer(full_err_path, error_script_text, False)
+    
+    file_writer(full_err_path, error_script_text, False)
     
     return create_err_file
 
@@ -86,7 +86,7 @@ def check_and_gen_filename (full_path, install_filename):
     return tmp_filename
 
 
-def create_install_file(object_list, install_filename):
+def create_install_file(object_list, install_filename, commit_msg):
     full_path = Path(config.install_dir, install_filename)
     install_script_text = ''
     object_type_header = ''
@@ -100,13 +100,13 @@ def create_install_file(object_list, install_filename):
       install_script_text = get_prev_text(full_path)     
 
       if object_list and install_script_text != '':
-          install_script_text += '------------------------- commit_id = '+ config.mode_params["commit_id"] + '------------------------- \n'       
+          install_script_text += '\n\n------------------------- '+ commit_msg  
  
     for item in object_list:
         create_file = True
 
         if install_script_text == '':
-            install_script_text =  '-- Schema: ' + get_schema_by_server_schema(item["server"], item["schema"]).upper() + ' \nprompt install '+ install_filename + ' \nset define off spool ' + install_filename.split('.')[0] + '.log append \n \n'
+            install_script_text =  '-- Schema: ' + get_schema_by_server_schema(item["server"], item["schema"]).upper() + ' \nprompt install '+ install_filename + '\nset define off\nspool ' + install_filename.split('.')[0] + '.log append \n \n'
                          
         if item["object_type"].find('scripts') == -1:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item['module_name'] + '-------------------------'
@@ -132,7 +132,7 @@ def create_install_file(object_list, install_filename):
             install_script_text += item["path_to_file"].replace(main_path, '@     .').replace('\\','/') + '\n'
     
     if create_file:
-       install_script_text += '\n\n' + 'spool ' + install_filename.split('.')[0] + '.log append \n \n' + 'spool off'
+       install_script_text += '\n' + 'spool off'
        file_writer(full_path, install_script_text, config.mode_params["file_write_mode"]["add_to_end"])
     
     return create_file

@@ -99,14 +99,16 @@ def create_install_file(object_list, install_filename, commit_msg):
     elif config.mode_params["file_write_mode"]["add_to_end"] and os.path.exists(full_path):
       install_script_text = get_prev_text(full_path)     
 
-      if object_list and install_script_text != '':
-          install_script_text += '\n/*\n'+ commit_msg + '\n*/'
+  
+    if object_list and install_script_text != '':
+        install_script_text += '-- '+ commit_msg
  
     for item in object_list:
         create_file = True
 
         if install_script_text == '':
             install_script_text =  '-- Schema: ' + get_schema_by_server_schema(item["server"], item["schema"]).upper() + ' \nprompt install '+ install_filename + '\nset define off\nspool ' + install_filename.split('.')[0] + '.log append \n \n'
+            install_script_text += '-- '+ commit_msg
                          
         if item["object_type"].find('scripts') == -1:
             cur_module_header = '-------------------------'+ item['epic_module_name'] + '/' + item['module_name'] + '-------------------------'

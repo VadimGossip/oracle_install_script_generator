@@ -70,7 +70,7 @@ def split_oracle_object_list(tcs_oracle_object_list):
     undef_schema_list, undef_object_type_list = [],[]
     splited_oracle_object_list = []
     git_full_filename_path_list, commit_msg = git_scanner.scan_git_for_changed_objects()
-    for object in tcs_oracle_object_list:
+    for object in tcs_oracle_object_list:        
         if  (object["path_to_file"] in git_full_filename_path_list or config.mode_params["scan_mode_name"] == 'full') and object["object_type"] in allowed_object_type_sort_mask:
             if object["schema"] == 'vtbs' and object["server"] == 'core' :
                 if object["object_type"] == 'scripts_migration':
